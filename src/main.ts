@@ -3,6 +3,8 @@ import { App } from './app';
 import { initKeyboard, pollPadNav } from './core/input';
 import { audio } from './audio/audio';
 import { settings } from './core/store';
+import { initAutoFullscreen } from './core/fullscreen';
+import { toast } from './ui/dom';
 
 initKeyboard();
 const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -15,6 +17,15 @@ const unlock = () => audio.unlock();
 window.addEventListener('pointerdown', unlock, { once: true });
 window.addEventListener('keydown', unlock, { once: true });
 
+// fullscreen on the first tap / click / key press, and again after leaving it
+initAutoFullscreen(() => setTimeout(() => toast('For true fullscreen: Share → Add to Home Screen', 4500), 2500));
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'F11') {
+    e.preventDefault();
+    import('./core/fullscreen').then(({ toggleFullscreen }) => toggleFullscreen());
+  }
+});
+
 // gamepad menu navigation
 const padLoop = (t: number) => {
   pollPadNav(t);
@@ -22,7 +33,7 @@ const padLoop = (t: number) => {
 };
 requestAnimationFrame(padLoop);
 window.addEventListener('gamepadconnected', (e) => {
-  import('./ui/dom').then(({ toast }) => toast(`🎮 ${(e as GamepadEvent).gamepad.id.slice(0, 32)} connected`));
+  toast(`🎮 ${(e as GamepadEvent).gamepad.id.slice(0, 32)} connected`);
   app.game.touch.show(false);
 });
 

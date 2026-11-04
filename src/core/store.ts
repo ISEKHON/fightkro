@@ -46,6 +46,7 @@ export interface Settings {
   timer: number;
   hazards: boolean;
   playerName: string;
+  autoFullscreen: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -73,6 +74,7 @@ export const DEFAULT_SETTINGS: Settings = {
   timer: 90,
   hazards: true,
   playerName: 'NETA',
+  autoFullscreen: true,
 };
 
 export const settings: Settings = load('settings', DEFAULT_SETTINGS);

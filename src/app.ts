@@ -15,6 +15,7 @@ import { frontPage } from './ui/news';
 import { PERKS, PERK_UNLOCKS, CAMPAIGN, CAMPAIGN_EVENTS, campaignEnding, DAILY_MODS, dailySeed, tierFor } from './modes/data';
 import { decodeReplay, deleteReplay, encodeReplay, savedReplays, storeReplay, b64u, unb64u, deflate, inflate } from './core/replay';
 import { ClipRecorder, shareOrDownload } from './core/clip';
+import { enterFullscreen, toggleFullscreen } from './core/fullscreen';
 import { NetClient } from './net/net';
 import { RollbackDriver, SpectatorDriver } from './net/rollback';
 import { mergeGhost, type Difficulty, type GhostProfile } from './ai/cpu';
@@ -266,7 +267,7 @@ export class App {
       audio.unlock();
       audio.play('confirm');
       audio.startMusic('menu');
-      requestFullscreenMaybe();
+      if (settings.autoFullscreen) enterFullscreen();
       if (after) after();
       else this.menu();
     };
@@ -1655,6 +1656,10 @@ export class App {
       slider('SCREEN SHAKE', 0, 1.5, 0.1, () => settings.shake, (v) => (settings.shake = v));
       choice('IMPACT FLASHES', [[1, 'ON'], [0, 'OFF']], () => (settings.flashes ? 1 : 0), (v) => (settings.flashes = !!v));
       choice('CLIP CAPTURE (last ~10s)', [[1, 'ON'], [0, 'OFF']], () => (load('clipsOn', false) ? 1 : 0), (v) => save('clipsOn', !!v));
+      choice('AUTO FULLSCREEN', [[1, 'ON'], [0, 'OFF']], () => (settings.autoFullscreen ? 1 : 0), (v) => {
+        settings.autoFullscreen = !!v;
+        if (v) enterFullscreen();
+      });
       const fs = this.btn('TOGGLE FULLSCREEN', () => toggleFullscreen());
       body.appendChild(fs);
     } else if (tab === 'audio') {
@@ -1820,22 +1825,6 @@ function autoQuality(): number {
   const mem = (navigator as unknown as { deviceMemory?: number }).deviceMemory ?? 4;
   if (mobile) return mem >= 6 ? 1 : 0;
   return 2;
-}
-
-function requestFullscreenMaybe() {
-  if (!isTouchDevice()) return;
-  const d = document.documentElement as HTMLElement & { webkitRequestFullscreen?: () => void };
-  try {
-    (d.requestFullscreen?.({ navigationUI: 'hide' }) ?? d.webkitRequestFullscreen?.())?.catch?.(() => {});
-    (screen.orientation as unknown as { lock?: (o: string) => Promise<void> })?.lock?.('landscape').catch(() => {});
-  } catch {
-    /* not allowed */
-  }
-}
-
-function toggleFullscreen() {
-  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-  else document.documentElement.requestFullscreen?.().catch(() => {});
 }
 
 function onNavStart(fn: () => void) {
