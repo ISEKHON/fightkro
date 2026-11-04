@@ -4,7 +4,8 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { CHARS } from '../sim/roster';
-import { WALL } from '../sim/sim';
+import { WALL, debugBoxes } from '../sim/sim';
+import { settings as userSettings } from '../core/store';
 import type { GameEvent, MatchState } from '../sim/types';
 import { FighterView } from './fighterView';
 import { buildZone, type ZoneBuild } from './stages';
@@ -57,6 +58,7 @@ export class GameRenderer {
   private canvas: HTMLCanvasElement;
   dmgFlashT = [0, 0];
   private invertT = 0;
+  private dbg: THREE.Mesh[] = [];
 
   constructor(canvas: HTMLCanvasElement, settings: RenderSettings) {
     this.canvas = canvas;
@@ -143,7 +145,11 @@ export class GameRenderer {
     this.zoneIdx = -1;
     this.setZone(s.zone);
     this.vfx.clear();
+    this.finisher?.dispose();
     this.finisher = null;
+    this.xrayT = 0;
+    this.xrayVictim = -1;
+    this.koOrbit = 0;
     this.lastPhase = '';
     for (const p of this.projViews.values()) p.removeFromParent();
     this.projViews.clear();
@@ -580,6 +586,7 @@ export class GameRenderer {
     }
     if (this.zone?.weather === 'confetti' && Math.random() < dt * 2) this.vfx.confettiBurst((Math.random() - 0.5) * 12, 7, -2, 4);
     this.vfx.update(dt, this.camPos.x);
+    this.drawDebug(s);
     this.updateCamera(s, dt);
     if (this.invertT > 0) {
       this.invertT -= dt;
@@ -589,6 +596,24 @@ export class GameRenderer {
     this.renderer.toneMappingExposure = xr ? 0.8 : 1.05;
     if (this.composer) this.composer.render();
     else this.renderer.render(this.scene, this.camera);
+  }
+
+  drawDebug(s: MatchState) {
+    const boxes = s.cfg.training && userSettings.showHitboxes ? debugBoxes(s) : [];
+    while (this.dbg.length < boxes.length) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 0.6), new THREE.MeshBasicMaterial({ wireframe: true, transparent: true, depthTest: false }));
+      m.renderOrder = 30;
+      this.scene.add(m);
+      this.dbg.push(m);
+    }
+    this.dbg.forEach((m, i) => {
+      const b = boxes[i];
+      m.visible = !!b;
+      if (!b) return;
+      m.position.set((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2, 0);
+      m.scale.set(Math.max(0.01, b.x1 - b.x0), Math.max(0.01, b.y1 - b.y0), 1);
+      (m.material as THREE.MeshBasicMaterial).color.set(b.hit ? 0xff2020 : 0x20ff60);
+    });
   }
 
   /** Render a simple showcase scene (menus / character select) */

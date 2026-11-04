@@ -1760,6 +1760,14 @@ label.cf {
   }
   .sel-grid {
     gap: 4px;
+    max-width: 52vh;
+    margin: 0 auto;
+  }
+  .sel-center {
+    justify-content: flex-start;
+  }
+  .sel-top h2 {
+    font-size: 1.3rem;
   }
   .tile span {
     font-size: 0.75rem;

@@ -1141,6 +1141,12 @@ export class App {
     reset.onclick = () => this.trainingReset();
     const meter = el('button', { class: 'chip' }, '∞ METER');
     meter.onclick = () => this.game.s?.f.forEach((f) => ((f.meter = 300), (f.rage = 100)));
+    const hb = el('button', { class: 'chip' + (settings.showHitboxes ? ' on' : '') }, 'HITBOXES');
+    hb.onclick = () => {
+      settings.showHitboxes = !settings.showHitboxes;
+      hb.classList.toggle('on', settings.showHitboxes);
+    };
+    bar.appendChild(hb);
     const moves = el('button', { class: 'chip' }, 'MOVES');
     moves.onclick = () => this.moveList(this.pick.p1);
     bar.append(reset, meter, moves);

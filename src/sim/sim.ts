@@ -1694,11 +1694,12 @@ export function step(s: MatchState, inputs: [number, number]) {
 
   if (s.superFreeze > 0) {
     s.superFreeze--;
-    // the super owner keeps animating the flash pose; nothing else moves
+    freezeBuffers(s);
     return;
   }
   if (s.hitstop > 0) {
     s.hitstop--;
+    freezeBuffers(s);
     return;
   }
   if (s.slowFrames > 0) {
@@ -1771,6 +1772,14 @@ export function step(s: MatchState, inputs: [number, number]) {
   }
 }
 
+/** Time frozen in hitstop / super flash does not age buffered inputs (so presses during a freeze still come out). */
+function freezeBuffers(s: MatchState) {
+  for (const f of s.f) {
+    if (f.bufPressed && f.bufF < s.frame) f.bufF++;
+    f.lastCmdF++;
+  }
+}
+
 function endMatch(s: MatchState) {
   const [a, b] = s.f;
   s.phase = 'matchOver';
@@ -1784,6 +1793,25 @@ function endMatch(s: MatchState) {
     } else if (s.matchWinner >= 0 && !s.finisher) setSt(f, f.dead ? 'knockdown' : 'lose', 99999);
   }
   ev(s, { t: 'matchOver', s: s.matchWinner, v: s.finisher ? 1 : 0 });
+}
+
+/** Hurtboxes (green) and active hitboxes (red) for the training-mode overlay. */
+export function debugBoxes(s: MatchState): { x0: number; x1: number; y0: number; y1: number; hit: boolean }[] {
+  const out: { x0: number; x1: number; y0: number; y1: number; hit: boolean }[] = [];
+  for (const f of s.f) {
+    const h = hurtbox(f, false);
+    if (h) out.push({ ...h, hit: false });
+    if (f.st === 'attack' && f.move) {
+      const m = moveOf(f)!;
+      if (f.mf >= m.startup && f.mf < m.startup + m.active && m.box.w > 0 && !m.projectile) {
+        const cx = f.x + f.facing * m.box.x;
+        const cy = f.y + m.box.y;
+        out.push({ x0: cx - m.box.w, x1: cx + m.box.w, y0: cy - m.box.h, y1: cy + m.box.h, hit: true });
+      }
+    }
+  }
+  for (const p of s.projs) out.push({ x0: p.x - p.def.box.w, x1: p.x + p.def.box.w, y0: p.y - (p.def.box.h || 0.2), y1: p.y + (p.def.box.h || 0.2), hit: true });
+  return out;
 }
 
 // ---------------------------------------------------------------- state utilities
