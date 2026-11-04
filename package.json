@@ -1,0 +1,25 @@
+{
+  "name": "kursi-kand",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "KURSI KAND - a brutal 3D political satire fighting game for mobile and PC web.",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "server": "node server/server.mjs"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/three": "^0.187.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}
