@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Kursi Kand" />
+    <meta name="theme-color" content="#0d0604" />
+    <meta name="description" content="KURSI KAND — a brutal 3D political satire fighting game. Original fictional caricatures, rollback online, mobile & PC." />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Teko:wght@400;600;700&display=swap" rel="stylesheet" />
+    <title>Kursi Kand</title>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="hudroot"></div>
+    <div id="ui"></div>
+    <div id="rotate"><div>📱↻</div><b>ROTATE YOUR PHONE</b><span>Kursi Kand is played in landscape.</span></div>
+    <div id="loader"><div class="logo"><span class="k1">KURSI</span><span class="k2">KAND</span></div><div class="spin"></div></div>
+    <noscript>Kursi Kand needs JavaScript and WebGL.</noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
